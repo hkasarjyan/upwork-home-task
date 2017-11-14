@@ -47,7 +47,7 @@ class Search(unittest.TestCase):
     def test_search_in_python_org(self):
         driver = self.driver
         
-        keyword="android developer"
+        keyword="armen"
         
         # 2.  Clear `<browser>` cookies
         # Validate cookies are deleted
@@ -100,9 +100,13 @@ class Search(unittest.TestCase):
         random_freelancer_number  = random.randint(0, len(freelancers_object_list)-1)
         freelancer_to_open = freelancers_object_list[random_freelancer_number].element
         freelancer_to_open.click()
-        
 
-        
+        # 11. Check that each attribute value is equal to one of those stored in the structure created in #67
+        time.sleep(30)
+        elem_freelancer = driver.find_element_by_id("oProfilePage")
+        rates=elem_freelancer.find_element_by_class_name("m-lg-top")
+        rate = rates.text
+
         print("AA")
 
 
