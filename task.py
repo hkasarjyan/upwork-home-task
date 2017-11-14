@@ -5,6 +5,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 import time
 import random
+import os
 
 class Freelancer():
     def __init__(self, html_element, freelancer_name, freelancer_title, freelancer_rate, freelancer_earned, freelancer_location, freelancer_description, freelancer_skills):
@@ -33,11 +34,12 @@ class Freelancer():
         checklist = [self.name, self.title, self.location, self.description, str_skills]
         for attribute_value in checklist:        
             if keyword.lower() in attribute_value.lower():
-                print("Freelancer with %s name contains search keyword, keyword is in %s attribute \n"%(self.name, attribute_value))
+                print("Freelancer with %s name contains search keyword, keyword is in %s attribute"%(self.name, attribute_value))
                 check=1
                 #break
         if check == 0:
-            print("Freelancer with %s name does not contain search keyword\n"%self.name)
+            print("Freelancer with %s name does not contain search keyword"%self.name)
+        print("\n")
 
 
 class Search(unittest.TestCase):
@@ -69,7 +71,8 @@ class Search(unittest.TestCase):
             print("Need to set KEYWORD env variable for serach keyword")
             print("Setting to default `armen`")
             keyword = "armen"
-        
+            print("Running case with %s keyword"%keyword)
+
         # 2.  Clear `<browser>` cookies
         # Validate cookies are deleted
         driver.delete_all_cookies()
