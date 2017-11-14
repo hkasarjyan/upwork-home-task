@@ -18,30 +18,32 @@ class Freelancer():
         self.skills=freelancer_skills
     
     def getInfo(self):
-        print("-----------------Freelancer info------------------\n")
+        print("-----------------Freelancer info------------------")
         print("Freelancer Name: %s"%self.name)
         print("Freelancer Title: %s"%self.title)
         print("Freelancer Rate: %s"%self.rate)
         print("Freelancer Earned: %s"%self.earned)
         print("Freelancer Location: %s"%self.location)
-        print("Freelancer Description: %s"%self.description)
-        print("Freelancer Skills: %s"%self.skills)
+        print("Freelancer Description: %s \n\n"%self.description.encode('utf8'))
     
     def checkValue(self, keyword):
+        print("-----------------Checking freelancer contains keyword------------------")
         check=0
         str_skills = ''.join(self.skills)
         checklist = [self.name, self.title, self.location, self.description, str_skills]
         for attribute_value in checklist:        
             if keyword.lower() in attribute_value.lower():
-                print("Freelancer with %s name contains search keyword, keyword is in %s attribute"%(self.name, attribute_value))
+                print("Freelancer with %s name contains search keyword, keyword is in %s attribute \n"%(self.name, attribute_value))
                 check=1
+                #break
         if check == 0:
-            print("Freelancer with %s name does not contain search keyword"%self.name)
+            print("Freelancer with %s name does not contain search keyword\n"%self.name)
 
 
 class Search(unittest.TestCase):
 
     def setUp(self):
+        # Read BROWSER env variable to run on Chrome or on firefox
         try:
             browser = os.environ['BROWSER']    
         except:
@@ -86,7 +88,7 @@ class Search(unittest.TestCase):
         elem = driver.find_element_by_xpath("//input[@placeholder='Find Freelancers']")
         elem.send_keys(keyword)
         elem.send_keys(Keys.RETURN)
-        time.sleep(10)
+        time.sleep(15)
 
 
         # 6.  Parse the 1st page with search results:
@@ -105,7 +107,7 @@ class Search(unittest.TestCase):
             freelancer_skills_list = []
             for skill in freelancer_skills:
                 freelancer_skills_list.append(skill.text)
-            freelancers_object_list.append(Freelancer(freelancer_element, freelancer_name.text, freelancer_title.text, freelancer_rates[0].text, freelancer_rates[1].text, freelancer_rates[2].text, freelancer_description.text, freelancer_skills_list))
+            freelancers_object_list.append(Freelancer(freelancer_element, freelancer_name.text, freelancer_title.text, freelancer_rates[0].text.split(" ")[0], freelancer_rates[1].text.split(" ")[0], freelancer_rates[2].text, freelancer_description.text, freelancer_skills_list))
         
         # 7. Make sure at least one attribute (title, overview, skills, etc) 
            #of each item (found freelancer) from parsed search results contains `<keyword>` 
@@ -120,10 +122,10 @@ class Search(unittest.TestCase):
         freelancer_to_open = freelancers_object_list[random_freelancer_number].element
         freelancer_to_open.click()
 
-        # 11. Check that each attribute value is equal to one of those stored in the structure created in #67
-        time.sleep(10)
+        # Get all info from freelancers page and create new Freelancer object
+        time.sleep(15)
         freelancer_name_in_profile = driver.find_elements_by_xpath(".//span[@itemprop='name']")[2].text
-        #freenalncer_title_in_profile = driver.find_element_by_xpath(".//h3[@class='m-0-top m-sm-bottom ng-scope']").text
+        freenalncer_title_in_profile = driver.find_element_by_xpath(".//span[@class='up-active-context up-active-context-title fe-job-title']").text
         freelancer_rate_in_profile  = driver.find_element_by_xpath(".//li[@class='width-xs m-0-bottom']").text
         try:            
             freelancer_earned_in_profile = driver.find_element_by_xpath(".//li[@class='width-xs m-lg-right m-0-bottom ng-scope']").text
@@ -132,29 +134,27 @@ class Search(unittest.TestCase):
             print("Freelancer hide his earnings")
         freelancer_location_in_profile = driver.find_element_by_xpath(".//span[@class='fe-map-trigger']").text
         freelancer_description_in_profile = driver.find_element_by_xpath(".//div[@class='up-active-container cfe-overview']").text        
+        freelancer_skills_in_profile = driver.find_elements_by_xpath(".//div[@class='o-profile-skills m-sm-top ng-scope']")[1].text
         
-        print("From main page")
-        print(freelancers_object_list[random_freelancer_number].name)
-        print(freelancers_object_list[random_freelancer_number].title)
-        print(freelancers_object_list[random_freelancer_number].description)
-        print(freelancers_object_list[random_freelancer_number].location)
-        print(freelancers_object_list[random_freelancer_number].rate)
-        print(freelancers_object_list[random_freelancer_number].earned)
-
-        print("*"*70)
-        print("From current page")
-        print(freelancer_name_in_profile.encode('utf8'))
-        #print(freenalncer_title_in_profile)
-        print(freelancer_description_in_profile.encode('utf8'))
-        print(freelancer_location_in_profile.encode('utf8'))
-        print(freelancer_rate_in_profile)
-        print(freelancer_earned_in_profile)
-
-
-
+        # Creat new freelancer object with parameters from it's page
+        freelancer_in_profile = Freelancer("", freelancer_name_in_profile, freenalncer_title_in_profile, freelancer_rate_in_profile.split("\n")[0], freelancer_earned_in_profile.split("\n")[0], freelancer_location_in_profile, freelancer_description_in_profile, freelancer_skills_in_profile)
         
+        # Printing freelancer info from main pagea and from it's own page, when already navigating into it.
+        print("Freelancer info from main page")
+        freelancers_object_list[random_freelancer_number].getInfo()
+        print("Same Freelancer info from its own page")
+        freelancer_in_profile.getInfo()
+        
+        # 11. Check that each attribute value is equal to one of those stored in the structure created in #67
+        assert freelancers_object_list[random_freelancer_number].name == freelancer_in_profile.name, "Names are not same"
+        assert freelancers_object_list[random_freelancer_number].title == freelancer_in_profile.title, "Titles are not same"
+        assert freelancers_object_list[random_freelancer_number].rate == freelancer_in_profile.rate, "Rates are not same"
+        assert freelancers_object_list[random_freelancer_number].location in freelancer_in_profile.location, "Locations are not same"
+        
+        # 12. Check whether at least one attribute contains `<keyword>`
+        freelancer_in_profile.checkValue(keyword)
 
-        print("AA")
+        print("DONE!!!")
 
 
 
