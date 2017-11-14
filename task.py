@@ -42,12 +42,31 @@ class Freelancer():
 class Search(unittest.TestCase):
 
     def setUp(self):
-        self.driver = webdriver.Firefox()
+        try:
+            browser = os.environ['BROWSER']    
+        except:
+            print("Need to set BROWSER env variable to run on 'Firefox' or 'Chrome'")
+            print("Setting to default `firefox`")
+            browser = "firefox"
+        
+        if browser == "firefox":
+            self.driver = webdriver.Firefox()
+        elif browser == "chrome":
+            self.driver = webdriver.Chrome()
+        else:
+            print("Setting to default `firefox`")
+            self.driver = webdriver.Firefox()
 
     def test_search_in_python_org(self):
         driver = self.driver
         
-        keyword="armen"
+# Reading environment variables
+        try:
+            keyword = os.environ['KEYWORD']    
+        except:
+            print("Need to set KEYWORD env variable for serach keyword")
+            print("Setting to default `armen`")
+            keyword = "armen"
         
         # 2.  Clear `<browser>` cookies
         # Validate cookies are deleted
@@ -67,7 +86,7 @@ class Search(unittest.TestCase):
         elem = driver.find_element_by_xpath("//input[@placeholder='Find Freelancers']")
         elem.send_keys(keyword)
         elem.send_keys(Keys.RETURN)
-        time.sleep(30)
+        time.sleep(10)
 
 
         # 6.  Parse the 1st page with search results:
@@ -102,10 +121,38 @@ class Search(unittest.TestCase):
         freelancer_to_open.click()
 
         # 11. Check that each attribute value is equal to one of those stored in the structure created in #67
-        time.sleep(30)
-        elem_freelancer = driver.find_element_by_id("oProfilePage")
-        rates=elem_freelancer.find_element_by_class_name("m-lg-top")
-        rate = rates.text
+        time.sleep(10)
+        freelancer_name_in_profile = driver.find_elements_by_xpath(".//span[@itemprop='name']")[2].text
+        #freenalncer_title_in_profile = driver.find_element_by_xpath(".//h3[@class='m-0-top m-sm-bottom ng-scope']").text
+        freelancer_rate_in_profile  = driver.find_element_by_xpath(".//li[@class='width-xs m-0-bottom']").text
+        try:            
+            freelancer_earned_in_profile = driver.find_element_by_xpath(".//li[@class='width-xs m-lg-right m-0-bottom ng-scope']").text
+        except:
+            freelancer_earned_in_profile = ""
+            print("Freelancer hide his earnings")
+        freelancer_location_in_profile = driver.find_element_by_xpath(".//span[@class='fe-map-trigger']").text
+        freelancer_description_in_profile = driver.find_element_by_xpath(".//div[@class='up-active-container cfe-overview']").text        
+        
+        print("From main page")
+        print(freelancers_object_list[random_freelancer_number].name)
+        print(freelancers_object_list[random_freelancer_number].title)
+        print(freelancers_object_list[random_freelancer_number].description)
+        print(freelancers_object_list[random_freelancer_number].location)
+        print(freelancers_object_list[random_freelancer_number].rate)
+        print(freelancers_object_list[random_freelancer_number].earned)
+
+        print("*"*70)
+        print("From current page")
+        print(freelancer_name_in_profile.encode('utf8'))
+        #print(freenalncer_title_in_profile)
+        print(freelancer_description_in_profile.encode('utf8'))
+        print(freelancer_location_in_profile.encode('utf8'))
+        print(freelancer_rate_in_profile)
+        print(freelancer_earned_in_profile)
+
+
+
+        
 
         print("AA")
 
